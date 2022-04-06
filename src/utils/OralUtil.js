@@ -12,10 +12,10 @@ const randomSpecial = (lower, upper, excludes = [0]) => {
 
 // 生成2位数的口算题。如：15+25、50-35
 export const oralTwoOral = ({
-  p1, pOrder = 1, // pOrder:参数的顺序。1:p1-p2、2:p2-p1
-  operList = ['+', '-'],
-  resultMin = 0, resultMax = 100,
-} = {}) => {
+                              p1, pOrder = 1, // pOrder:参数的顺序。1:p1-p2、2:p2-p1
+                              operList = ['+', '-'],
+                              resultMin = 0, resultMax = 100,
+                            } = {}) => {
   let p2;
   let result;
   let paramOrder = pOrder;
@@ -54,14 +54,14 @@ export const oralTwoOral = ({
 };
 
 // 获取算式显示方式。如：15+25-10=
-export const getEquationDisplay = ({ equations, finalResult }) => {
+export const getEquationDisplay = ({equations, finalResult}) => {
   const display = `${equations.join(' ')} =`;
   const answer = finalResult;
-  return { display, answer };
+  return {display, answer};
 };
 
 // 获取填空题显示方式。如：15+_-10=30
-export const getGapFillingDisplay = ({ equations, finalResult }) => {
+export const getGapFillingDisplay = ({equations, finalResult}) => {
   const equIdx = _.map(equations, (value, index) => {
     if (_.isNumber(value)) {
       return index;
@@ -77,27 +77,48 @@ export const getGapFillingDisplay = ({ equations, finalResult }) => {
 
   const display = gapEqus.join(' ');
 
-  return { display, answer };
+  return {display, answer};
 };
 
 // 获取题目显示方式
 export const getDisplay = ({
-  operNum, displayType, equations, finalResult,
-}) => {
+                             operNum, displayType, equations, finalResult,
+                           }) => {
   const type = _.sample(displayType);
   if (String(type) === '2') {
-    return getGapFillingDisplay({ operNum, equations, finalResult });
+    return getGapFillingDisplay({operNum, equations, finalResult});
   }
-  return getEquationDisplay({ equations, finalResult });
+  return getEquationDisplay({equations, finalResult});
 };
+
+function check_equations({
+                           equations, finalResult, display, answer,
+                         }, {
+                           paramMin = 0, paramMax = 100,
+                           operNum = 3, operList = ['+', '-'],
+                           resultMin = 0, resultMax = 100,
+                           displayType = [1], bracketType = 0,
+                         }) {
+  let result = true
+  equations.forEach(ele => {
+    if (Number.isInteger(ele)) {
+      if (ele < paramMin || ele > paramMax) result = false
+    } else if (ele === '+' || ele === '-') {
+      if (!operList.includes(ele)) result = false
+    } else if (answer < resultMin || answer > resultMax) result = false
+  })
+
+  console.log('check_equations:', equations, '-->', result)
+  return result
+}
 
 // 生成多位数的口算题。如：15+25-10、50-35+15
 export const oralGenerator = ({
-  paramMin = 0, paramMax = 100,
-  operNum = 3, operList = ['+', '-'],
-  resultMin = 0, resultMax = 100,
-  displayType = [1], bracketType = 0,
-} = {}) => {
+                                paramMin = 0, paramMax = 100,
+                                operNum = 3, operList = ['+', '-'],
+                                resultMin = 0, resultMax = 100,
+                                displayType = [1], bracketType = 0,
+                              } = {}) => {
   // 随机生成第一个参数
   let p1 = randomSpecial(paramMin, paramMax);
   // 保存算式
@@ -148,7 +169,7 @@ export const oralGenerator = ({
   }
 
   // 保存显示方式
-  const { display, answer } = getDisplay({
+  const {display, answer} = getDisplay({
     operNum, displayType, equations, finalResult,
   });
 
@@ -159,32 +180,39 @@ export const oralGenerator = ({
 
 /**
  * 批量生成口算题
+ * @param paramMin
+ * @param paramMax
+ * @param operNum
+ * @param operList
+ * @param resultMin
+ * @param resultMax
  * @param {*} batchNum 生成题目数量
  * @param {*} displayType 答题方式 1|标准题、2|填空题
  * @param {*} bracketType 是否包含括号 0|无括号、1|有括号、2|随机括号
  */
 export const oralGeneratorBatch = ({
-  paramMin = 0, paramMax = 100,
-  operNum = 3, operList = ['+', '-'],
-  resultMin = 0, resultMax = 100,
-  batchNum = 100, displayType = [1],
-  bracketType = 0,
-} = {}) => {
+                                     paramMin = 0, paramMax = 100,
+                                     operNum = 3, operList = ['+', '-'],
+                                     resultMin = 0, resultMax = 100,
+                                     batchNum = 100, displayType = [1], bracketType = 0,
+                                   } = {}) => {
+  console.log('--> oralGeneratorBatch.operList:', operList);
   const resultList = [];
   for (let i = 0; i < batchNum; i += 1) {
-    const resultObj = oralGenerator({
-      paramMin,
-      paramMax,
-      operNum,
-      operList,
-      resultMin,
-      resultMax,
-      displayType,
-      bracketType: bracketType === 2 ? _.sample([0, 1]) : bracketType,
+    const bracket_type = bracketType === 2 ? _.sample([0, 1]) : bracketType
+    let resultObj = oralGenerator({
+      paramMin, paramMax, operNum, operList, resultMin, resultMax, displayType, bracketType: bracket_type,
     });
+    while (!check_equations(resultObj, {
+      paramMin, paramMax, operNum, operList, resultMin, resultMax, displayType, bracketType: bracket_type,
+    })) {
+      resultObj = oralGenerator({
+        paramMin, paramMax, operNum, operList, resultMin, resultMax, displayType, bracketType: bracket_type,
+      });
+    }
     resultList.push(resultObj);
   }
   return resultList;
 };
 
-export default { oralTwoOral, oralGenerator, oralGeneratorBatch };
+export default {oralTwoOral, oralGenerator, oralGeneratorBatch};

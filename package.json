@@ -10,6 +10,7 @@
   "dependencies": {
     "element-plus": "^2.1.8",
     "element-ui": "^2.15.6",
+    "lodash": "^4.17.21",
     "vue": "^3.2.25",
     "vue-router": "^4.0.13",
     "vuex": "^4.0.2"

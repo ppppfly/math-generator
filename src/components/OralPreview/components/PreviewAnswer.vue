@@ -13,11 +13,8 @@
           口算答案（{{ num2hanzi(pageIndex + 1) }}）
         </div>
         <div class="page-content">
-          <template v-for="(item,index) in oralPageDatas">
-            <div
-                :key="index"
-                class="page-content-item"
-            >
+          <template v-for="(item,index) in oralPageDatas" :key="index">
+            <div class="page-content-item">
               <span class="item-cell">
                 <!-- <span class="item-index">{{ circleNumber(index + 1) }}</span> -->
                 <CircleNumber
@@ -35,7 +32,7 @@
 </template>
 
 <script setup>
-import CircleNumber from "../../CircleNumber";
+import CircleNumber from "./CircleNumber.vue";
 import {num2hanzi} from "../../../utils/NumberUtil";
 
 const props = defineProps({

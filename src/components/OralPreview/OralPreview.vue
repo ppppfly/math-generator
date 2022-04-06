@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="oral-preview">
-      <template v-if="oralPageList && oralPageList.length > 0">
+      <template v-if="oralPageList?.length > 0">
         <div
             v-for="(oralPageDatas,pageIndex) in oralPageList"
             :key="pageIndex"
@@ -16,11 +16,8 @@
             得分:________
           </div>
           <div class="page-content">
-            <template v-for="(item,index) in oralPageDatas">
-              <div
-                  :key="index"
-                  class="page-content-item"
-              >
+            <template v-for="(item,index) in oralPageDatas" :key="index">
+              <div class="page-content-item">
                 <span class="item-cell">
                   <!-- <span class="item-index">{{ circleNumber(index + 1) }}</span> -->
                   <CircleNumber
@@ -42,35 +39,14 @@
 <script setup>
 import {oralGeneratorBatch} from '../../utils/OralUtil';
 import {num2hanzi} from '../../utils/NumberUtil';
-import CircleNumber from '../CircleNumber.vue';
+import CircleNumber from './components/CircleNumber.vue';
 import PreviewAnswer from './components/PreviewAnswer.vue';
 import {computed, ref} from "vue";
+import {useStore} from "vuex";
 
-let oralList = ref([])
-let pageSize = ref(30)
-// 页数
-const pageNum = computed(() => Math.ceil(oralList.value.length / pageSize.value))
-const oralPageList = computed(() => {
-  if (pageNum.value > 0) {
-    return [...(new Array(pageNum.value)).keys()].map((pageIndex) => {
-      const startIdx = pageIndex * pageSize.value;
-      const endIdx = (pageIndex + 1) * pageSize.value;
-      return oralList.value.slice(startIdx, endIdx);
-    });
-  }
-  return [];
-})
+const store = useStore()
 
-const oralGenerator = (params) => {
-  pageSize.value = params.pageSize;
-  const oralList = oralGeneratorBatch(params);
-  oralList.value = oralList.map(item => ({
-    display: item.display.replace('_', '__'),
-    answer: item.answer,
-  }));
-}
-
-const handlePrint = () => window.print();
+const oralPageList = computed(() => store.getters.oralPageList)
 </script>
 
 <style lang="scss" scoped>

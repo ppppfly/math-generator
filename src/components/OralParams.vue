@@ -1,11 +1,11 @@
 <template>
-  <div class="oral-param">
+  <div class="oral-param print_hide">
     <div class="param-form">
-      <el-form :model="formModel">
+      <el-form :model="formModel" @submit="handle_submit">
         <el-form-item label="题型选择:">
           <el-checkbox-group v-model="formModel.operList">
-            <el-checkbox label="+" name="type">加法</el-checkbox>
-            <el-checkbox label="-" name="type">减法</el-checkbox>
+            <el-checkbox label="+">加法</el-checkbox>
+            <el-checkbox label="-">减法</el-checkbox>
           </el-checkbox-group>
         </el-form-item>
 
@@ -25,29 +25,35 @@
         </el-form-item>
 
         <el-form-item label="算数范围:">
-          <el-input-number v-model="formModel.paramMin" size="mini" label="最小值"/>
+          <el-input-number v-model="formModel.paramMin" size="small" label="最小值"/>
           <div class="scope-joint-mark"/>
-          <el-input-number v-model="formModel.paramMax" size="mini" label="最大值"/>
+          <el-input-number v-model="formModel.paramMax" size="small" label="最大值"/>
         </el-form-item>
 
         <el-form-item label="结果范围:">
-          <el-input-number v-model="formModel.resultMin" size="mini" label="最小值"/>
+          <el-input-number v-model="formModel.resultMin" size="small" label="最小值"/>
           <div class="scope-joint-mark"/>
-          <el-input-number v-model="formModel.resultMax" size="mini" label="最大值"/>
+          <el-input-number v-model="formModel.resultMax" size="small" label="最大值"/>
         </el-form-item>
 
         <el-form-item label="运算位数:">
-          <el-input-number v-model="formModel.operNum" :min="2" :max="10" size="mini" label="运算位数"/>
+          <el-input-number v-model="formModel.operNum" :min="2" :max="10" size="small" label="运算位数"/>
         </el-form-item>
 
         <el-form-item label="题目数量:">
           <span>
             <span class="param-sub-label">总页数：</span>
-            <el-input-number v-model="formModel.pageCount" :min="1" size="mini" label="总页数"/>
+            <el-input-number v-model="formModel.pageCount" :min="1" size="small" label="总页数"/>
             <span class="param-sub-label label-page-size">每页题目数：</span>
-            <el-input-number v-model="formModel.pageSize" :min="1" size="mini" label="每页条数"/>
+            <el-input-number v-model="formModel.pageSize" :min="1" size="small" label="每页条数"/>
           </span>
         </el-form-item>
+
+        <div class="buttons">
+          <el-button native-type="submit">生成</el-button>
+          <el-button @click="handle_print">打印</el-button>
+        </div>
+
       </el-form>
     </div>
     <div class="param-declare"/>
@@ -57,26 +63,25 @@
 <script setup>
 
 import {ref} from "vue";
+import {useStore} from "vuex";
 
-let formModel = ref({
-  operList: ['+', '-'], // 可选运算符
-  paramMin: 0, // 参与运算的数的最小值
-  paramMax: 100, // 参与运算的数的最大值
-  resultMin: 0, // 计算结果的最小值
-  resultMax: 100, // 计算结果的最大值
-  operNum: 3, // 运算位数
-  batchNum: 300, // 生成题目数量
-  pageCount: 10, // 总页数
-  pageSize: 30, // 每页题目数量
-  displayType: [1], // 题目呈现方式。1|标准题型，2|填空题型
-  bracketType: 0, // 有无括号。0|无、1|有、2|随机
-})
+let store = useStore()
 
-const getParams = () => formModel.value;
+let formModel = ref(store.state.formModel)
+
+const handle_submit = () => {
+  store.commit('handleOralGenerator', formModel)
+}
+const handle_print = () => window.print()
 </script>
 
 <style lang="scss" scoped>
+
 .oral-param {
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+
   width: 100%;
   display: flex;
   justify-content: center;
@@ -116,5 +121,11 @@ const getParams = () => formModel.value;
 
 .el-form-item {
   margin-bottom: 0;
+}
+
+.buttons {
+  display: flex;
+  justify-content: center;
+  margin: 10px;
 }
 </style>
